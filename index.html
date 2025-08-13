@@ -1,27 +1,33 @@
-<!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Điểm danh sinh viên</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      max-width: 400px;
-      margin: 20px auto;
+      max-width: 480px;
+      margin: 30px auto;
       padding: 20px;
-      border: 1px solid #ddd;
-      border-radius: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      background-color: #f9f9f9;
       text-align: center;
     }
-    img {
+    img.logo {
       max-width: 120px;
       margin-bottom: 15px;
     }
-    input, button {
+    h2 {
+      color: #333;
+      margin-bottom: 20px;
+    }
+    input, select, button {
       width: 100%;
       padding: 10px;
-      margin: 5px 0;
-      font-size: 16px;
+      margin: 8px 0;
+      box-sizing: border-box;
+      border-radius: 5px;
+      border: 1px solid #ccc;
     }
     button {
       background-color: #28a745;
@@ -32,49 +38,50 @@
     button:hover {
       background-color: #218838;
     }
-    #status {
-      margin-top: 15px;
-      color: blue;
-    }
   </style>
 </head>
 <body>
-  <!-- Logo -->
-  <img src="https://upload.wikimedia.org/wikipedia/commons/4/4a/Logo_2013_Google.png" alt="Logo trường">
+  <!-- Logo trường -->
+  <img class="logo" src="https://raw.githubusercontent.com/trambn268/Check/main/dng-removebg-preview.png" alt="Logo trường" />
 
-  <h2>Điểm danh sinh viên</h2>
+  <h2>Form điểm danh sinh viên</h2>
 
-  <input type="text" id="tenSV" placeholder="Nhập họ tên" required>
-  <button onclick="diemDanh()">Điểm danh</button>
-
-  <p id="status"></p>
+  <form id="attendanceForm">
+    <input type="text" name="fullname" placeholder="Họ và tên" required />
+    <input type="text" name="mssv" placeholder="MSSV" required />
+    <input type="text" name="class" placeholder="Lớp" required />
+    <input type="text" name="subject" placeholder="Môn học" required />
+    <input type="text" name="lesson" placeholder="Tiết học" required />
+    <input type="hidden" name="latitude" id="latitude" />
+    <input type="hidden" name="longitude" id="longitude" />
+    <button type="submit">Gửi điểm danh</button>
+  </form>
 
   <script>
-    function diemDanh() {
-      const tenSV = document.getElementById('tenSV').value.trim();
-      if (!tenSV) {
-        alert('Vui lòng nhập họ tên');
-        return;
-      }
-
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(function(position) {
-          const lat = position.coords.latitude;
-          const lng = position.coords.longitude;
-
-          google.script.run
-            .withSuccessHandler(function(message) {
-              document.getElementById('status').innerText = message;
-            })
-            .ghiDiemDanh(tenSV, lat, lng);
-
-        }, function() {
-          alert('Không thể lấy vị trí GPS');
-        });
-      } else {
-        alert('Trình duyệt không hỗ trợ GPS');
-      }
+    // Lấy vị trí GPS
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(function(position) {
+        document.getElementById('latitude').value = position.coords.latitude;
+        document.getElementById('longitude').value = position.coords.longitude;
+      });
+    } else {
+      alert("Trình duyệt không hỗ trợ GPS");
     }
+
+    // Xử lý gửi dữ liệu
+    document.getElementById('attendanceForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      fetch("YOUR_GOOGLE_SCRIPT_WEB_APP_URL", {
+        method: "POST",
+        body: new FormData(this)
+      })
+      .then(response => response.text())
+      .then(data => {
+        alert("Điểm danh thành công!");
+        this.reset();
+      })
+      .catch(error => alert("Lỗi: " + error));
+    });
   </script>
 </body>
 </html>
